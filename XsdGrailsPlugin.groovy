@@ -1,4 +1,4 @@
-class XsdToGormGrailsPlugin {
+class XsdGrailsPlugin {
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
@@ -11,7 +11,7 @@ class XsdToGormGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "Xsd To Gorm Plugin" // Headline display name of the plugin
+    def title = "Xsd Plugin" // Headline display name of the plugin
     def author = "Aaron J. Zirbes"
     def authorEmail = "aaron.zirbes@gmail.com"
     def description = '''\
@@ -19,7 +19,7 @@ Convert XSD document to GORM objects
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/xsd-to-gorm"
+    def documentation = "http://grails.org/plugin/xsd"
 
     // Extra (optional) plugin metadata
 
