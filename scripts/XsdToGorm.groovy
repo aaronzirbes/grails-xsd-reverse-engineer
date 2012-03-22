@@ -64,10 +64,15 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 
 	// dump out domain class information
 	gormDomainList[0..9].each{ gormDomain ->
+		// TODO: make sure package has matching folder, else create folder
+		// TODO: construct filename for domain class 
+		// TODO: open file, write contents, close file
+		println "***************************"
 		println "Found domain: ${gormDomain}"
-		gormDomain.properties.each{
-			println "\t${it.classType} ${it.name}\t(nullable: ${it.nullable}, minLength: ${it.minLength}, maxLength: ${it.maxLength}, pattern:'${it.pattern}')"
-		}
+		println "***************************"
+		println gormDomain.generateClassDefinition()
+
+		// Write domain classes for Enums
 	}
 
 	// TODO: Create GORM domain classes
