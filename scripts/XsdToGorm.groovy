@@ -45,14 +45,18 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 		.declareNamespace(xs: 'http://www.w3.org/2001/XMLSchema')
 	// Get the info from the XML
 	def metaData = MetaData.newInstance(xmlDoc)
+	printMessage "Loaded metadata for ${metaData.targetNamespace}"
 	def simpleTypeList = GormParser.parseSimpleTypes(xmlDoc)
+	printMessage "Loaded (${simpleTypeList.size()}) simpleType classes"
 	def enumTypeList = GormParser.parseEnumTypes(xmlDoc, metaData)
+	printMessage "Loaded (${enumTypeList.size()}) enumeration simpleType classes"
 	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, simpleTypeList, enumTypeList)
+
 
 	gormDomainList.each{ gormDomain ->
 		println "Found domain: ${gormDomain}"
 		gormDomain.properties.each{
-			println "\t${it.name}"
+			println "\t${it.classType} ${it.name}\t(nullable: ${it.nullable})"
 		}
 	}
 

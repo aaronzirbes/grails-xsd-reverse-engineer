@@ -35,7 +35,7 @@ class SimpleType {
 	String toString() { "${classPath} ${name}" }
 
 	/** a helper to return constraints */
-	def getConstraints() {
+	Collection getConstraints() {
 		return [ minLength, maxLength, pattern ]
 	}
 
