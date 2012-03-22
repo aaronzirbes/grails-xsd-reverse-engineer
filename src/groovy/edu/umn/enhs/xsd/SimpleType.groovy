@@ -34,6 +34,11 @@ class SimpleType {
 	/** the default toString converter */
 	String toString() { "${classPath} ${name}" }
 
+	/** a helper to return constraints */
+	def getConstraints() {
+		return [ minLength, maxLength, pattern ]
+	}
+
 	/** Constructor to create a SimpleType from an XML element */
 	SimpleType(GPathResult xmlElement) {
 
@@ -50,18 +55,7 @@ class SimpleType {
 				className = classMap[name].className
 			}
 
-			def restriction = xmlElement.'xs:restriction'
-			try {
-				minLength = Integer.parseInt(restriction.'xs:minLength'.@value.text())
-			} catch (NumberFormatException ex) {
-				minLength = null
-			}
-			try {
-				maxLength = Integer.parseInt(restriction.'xs:minLength'.@value.text())
-			} catch (NumberFormatException ex) {
-				maxLength = null
-			}
-			pattern = restriction.'xs:pattern'.@value.text()
+			(minLength, maxLength, pattern) = XsdUtils.getConstraints(xmlElement)
 		}
 	}
 

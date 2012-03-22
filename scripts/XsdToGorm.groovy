@@ -11,6 +11,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+import edu.umn.enhs.xsd.GormParser
+import edu.umn.enhs.xsd.MetaData
 
 USAGE = """
 Usage: grails xsd-to-gorm <xsd-file-to-process>
@@ -33,11 +35,30 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 
 	def xsdSourceFile = new File(xsdSourceFilePath)
 
-	// TODO: Parse XSD
-	def xsdDefinitions = parseXsd(xsdSourceFile)
+	// Parse the XML
+	def xmlDoc = new XmlSlurper().parse(xsdSourceFile)
+		.declareNamespace(xs: 'http://www.w3.org/2001/XMLSchema')
+	// Get the info from the XML
+	def metaData = new MetaData(xmlDoc)
+	def simpleTypeList = GormParser.parseSimpleTypes(xmlDoc)
+	def enumTypeList = GormParser.parseEnumTypes(xmlDoc, metaData)
+	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, sim:pleTypeList, enumTypeList)
+
+	gormDomainList.each{ gormDomain ->
+		println "Found domain: ${gormDomain}"
+		gormDomain.properties.each{
+			println "\t${it.name}"
+		}
+	}
+
 	// TODO: Create GORM domain classes
-	createDomainClassesFromDefinitions(xsdDefinitions)
+	// createDomainClassesFromDefinitions(xsdDefinitions)
 }
+
+/** Helper for printing informational messages */
+printMessage = { String message -> event('StatusUpdate', [message]) }
+/** Helper for printing error messages */
+errorMessage = { String message -> event('StatusError', [message]) }
 
 /** Script configuration */
 private boolean configure() {

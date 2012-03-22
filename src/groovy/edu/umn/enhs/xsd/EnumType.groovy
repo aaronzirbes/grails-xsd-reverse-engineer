@@ -11,7 +11,7 @@ class EnumType {
 	String packageName
 	/** name of enum class */
 	String className
-	/** tablename enum class should be stored in */
+	/** table name enum class should be stored in */
 	String tableName
 	/** description of enum type */
 	String description
@@ -37,7 +37,7 @@ class EnumType {
 		} else {
 			// get data from type
 			tableName = xmlElement.@name.text()
-			// convert tablename to camel case
+			// convert table name to camel case
 			className = GrailsNameUtils.getClassNameForLowerCaseHyphenSeparatedName(tableName.replace('_', '-'))
 			// load the Enum Values
 			values = new ArrayList<EnumValue>()
