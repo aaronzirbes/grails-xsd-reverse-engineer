@@ -22,9 +22,9 @@ class MetaData {
 
 	/** a constructor based on an XML document instance */
 	MetaData(GPathResult xmlDoc) {
-		xmlns = xmlDoc.@xmlns
-		targetNamespace = xmlDoc.@targetNamespace
-		elementFormDefault = xmlDoc.@elementFormDefault
-		attributeFormDefault = xmlDoc.@attributeFormDefault 
+		xmlns = xmlDoc.@xmlns.text()
+		targetNamespace = xmlDoc.@targetNamespace.text()
+		elementFormDefault = xmlDoc.@elementFormDefault.text()
+		attributeFormDefault = xmlDoc.@attributeFormDefault.text()
 	}
 }

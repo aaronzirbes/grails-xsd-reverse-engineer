@@ -34,6 +34,7 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	if ( ! configure() ) {
 		return 1
 	}
+	String xmlSchema = 'http://www.w3.org/2001/XMLSchema'
 
 	def GormParser = classLoader.loadClass("edu.umn.enhs.xsd.GormParser", true)
 	def MetaData = classLoader.loadClass("edu.umn.enhs.xsd.MetaData", true)
@@ -42,7 +43,7 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 
 	// Parse the XML
 	def xmlDoc = new XmlSlurper().parse(xsdSourceFile)
-		.declareNamespace(xs: 'http://www.w3.org/2001/XMLSchema')
+		.declareNamespace(xs: xmlSchema)
 	// Get the info from the XML
 	def metaData = MetaData.newInstance(xmlDoc)
 	printMessage "Loaded metadata for ${metaData.targetNamespace}"
@@ -50,18 +51,30 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	printMessage "Loaded (${simpleTypeList.size()}) simpleType classes"
 	def enumTypeList = GormParser.parseEnumTypes(xmlDoc, metaData)
 	printMessage "Loaded (${enumTypeList.size()}) enumeration simpleType classes"
+	// check for unknown simpleTypes
+	def unknownSimpleTypes = GormParser.findUnknownSimpleTypes(xmlDoc)
+	if (unknownSimpleTypes) {
+		unknownSimpleTypes.each {
+			errorMessage "Unknown simpleType: ${it}"
+		}
+		return false
+	}
+	// Load tables/domain classes
 	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, simpleTypeList, enumTypeList)
 
-
-	gormDomainList.each{ gormDomain ->
+	// dump out domain class information
+	gormDomainList[0..9].each{ gormDomain ->
 		println "Found domain: ${gormDomain}"
 		gormDomain.properties.each{
-			println "\t${it.classType} ${it.name}\t(nullable: ${it.nullable})"
+			println "\t${it.classType} ${it.name}\t(nullable: ${it.nullable}, minLength: ${it.minLength}, maxLength: ${it.maxLength}, pattern:'${it.pattern}')"
 		}
 	}
 
 	// TODO: Create GORM domain classes
 	// createDomainClassesFromDefinitions(xsdDefinitions)
+	// TODO: Create BootStrap data
+	// createBootStrapDataFromEnums(enumTypeList)
+
 }
 
 /** Helper for printing informational messages */
