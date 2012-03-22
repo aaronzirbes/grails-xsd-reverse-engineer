@@ -11,8 +11,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-import edu.umn.enhs.xsd.GormParser
-import edu.umn.enhs.xsd.MetaData
+//import edu.umn.enhs.xsd.GormParser
+//import edu.umn.enhs.xsd.MetaData
 
 USAGE = """
 Usage: grails xsd-to-gorm <xsd-file-to-process>
@@ -23,15 +23,20 @@ Example: grails xsd-to-gorm My-Company-Schema-v0.2.3.4.xsd
 """
 
 includeTargets << grailsScript('_GrailsBootstrap')
+includeTargets << grailsScript('Compile')
 
 xsdSourceFilePath = ''
 
 /** The primary target */
 target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	depends(classpath)
+	depends(compile)
 	if ( ! configure() ) {
 		return 1
 	}
+
+	def GormParser = classLoader.loadClass("edu.umn.enhs.xsd.GormParser", true)
+	def MetaData = classLoader.loadClass("edu.umn.enhs.xsd.MetaData", true)
 
 	def xsdSourceFile = new File(xsdSourceFilePath)
 
@@ -39,10 +44,10 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	def xmlDoc = new XmlSlurper().parse(xsdSourceFile)
 		.declareNamespace(xs: 'http://www.w3.org/2001/XMLSchema')
 	// Get the info from the XML
-	def metaData = new MetaData(xmlDoc)
+	def metaData = MetaData.newInstance(xmlDoc)
 	def simpleTypeList = GormParser.parseSimpleTypes(xmlDoc)
 	def enumTypeList = GormParser.parseEnumTypes(xmlDoc, metaData)
-	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, sim:pleTypeList, enumTypeList)
+	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, simpleTypeList, enumTypeList)
 
 	gormDomainList.each{ gormDomain ->
 		println "Found domain: ${gormDomain}"
