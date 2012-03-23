@@ -65,6 +65,7 @@ class GormDomainProperty {
 
 			// convert column name to camel case
 			name = GrailsNameUtils.getClassNameForLowerCaseHyphenSeparatedName(columnName.replace('_', '-'))
+			name = GrailsNameUtils.getPropertyNameRepresentation(name)
 			// get data type
 			def type = xmlElement.@type.text()
 			// find type

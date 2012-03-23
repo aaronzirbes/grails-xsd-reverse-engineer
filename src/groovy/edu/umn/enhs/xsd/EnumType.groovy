@@ -29,6 +29,14 @@ class EnumType {
 		description ? "${classPath} - ${description}" : classPath
 	}
 
+	String getPathName() {
+		String basePath = 'grails-app/domain'
+		String packagePath = packageName.replaceAll('\\.','/')
+		String fileName = className + '.groovy'
+
+		return "${basePath}/${packagePath}/${fileName}"
+	}
+
 	// Create a constructor from an xmlElement
 	EnumType(GPathResult xmlElement){
 		def elementName = xmlElement?.name()
@@ -65,5 +73,39 @@ class EnumType {
 		} else {
 			return true
 		}
+	}
+
+	String generateClassDefinition() {
+		def sb = new StringBuilder()
+		def nl = System.getProperty("line.separator")
+
+		sb << "package ${packageName}${nl}${nl}"
+		sb << "/** ${description} */${nl}"
+		sb << "class ${className} {${nl}${nl}"
+		sb << "\t/** The numeric code for this enumeration */${nl}"
+		sb << "\tInteger value${nl}"
+		sb << "\t/** Textual representation of this value */${nl}"
+		sb << "\tString label${nl}"
+		sb << "\t/** The name of the Master Class for this enumeration */${nl}"
+		sb << "\tString masterClass${nl}"
+		sb << "\t/** The global value, if any */${nl}"
+		sb << "\tString globalValue${nl}"
+		sb << "\t/** Description of class */${nl}"
+		sb << "\tString description${nl}"
+		sb << "${nl}"
+		sb << "\tstatic constraints = {${nl}"
+		sb << "\t\tvalue(unique:true)${nl}"
+		sb << "\t\tlabel(maxLength:255)${nl}"
+		sb << "\t\tmasterClass(nullable:true, maxLength:255)${nl}"
+		sb << "\t\tglobalValue(nullable:true, maxLength:255)${nl}"
+		sb << "\t\tdescription(nullable:true, maxLength:255)${nl}"
+		sb << "\t}${nl}"
+		sb << "\tstatic constraints = {${nl}"
+		sb << "\t\ttable '${tableName}'${nl}"
+		sb << "\t\tmasterClass column: 'master_cl'${nl}"
+		sb << "\t\tdescription column: 'desc'${nl}"
+		sb << "\t}${nl}"
+		sb << "}${nl}"
+		return sb
 	}
 }

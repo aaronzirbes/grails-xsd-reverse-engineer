@@ -26,7 +26,7 @@ class XsdUtils {
 			minLength = null
 		}
 		try {
-			maxLength = Integer.parseInt(restriction.'xs:minLength'.@value.text())
+			maxLength = Integer.parseInt(restriction.'xs:maxLength'.@value.text())
 		} catch (NumberFormatException ex) {
 			maxLength = null
 		}

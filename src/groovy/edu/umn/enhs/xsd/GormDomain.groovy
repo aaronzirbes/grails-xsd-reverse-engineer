@@ -69,35 +69,45 @@ class GormDomain {
 		return true
 	}
 
+	String getPathName() {
+		String basePath = 'grails-app/domain'
+		String packagePath = packageName.replaceAll('\\.','/')
+		String fileName = className + '.groovy'
+
+		return "${basePath}/${packagePath}/${fileName}"
+	}
+
 	String generateClassDefinition() {
 		def sb = new StringBuilder()
-		sb << "package ${packageName}\n\n"
-		sb << "/** Generated from Grails XSD plugin */\n"
-		sb << "class ${className} {\n\n"
+		def nl = System.getProperty("line.separator")
+
+		sb << "package ${packageName}${nl}${nl}"
+		sb << "/** Generated from Grails XSD plugin */${nl}"
+		sb << "class ${className} {${nl}${nl}"
 		properties.each{ p ->
 			if (p.pii || p.status) {
-				sb << "\t/**\n"
-				if (p.pii) { sb << "\t * PII level ${p.pii}\n" }
-				if (p.status) { sb << "\t * Status level ${p.status}\n" }
-				sb << "\t */\n"
+				sb << "\t/**${nl}"
+				if (p.pii) { sb << "\t * PII level ${p.pii}${nl}" }
+				if (p.status) { sb << "\t * Status level ${p.status}${nl}" }
+				sb << "\t */${nl}"
 			}
-			sb << "\t${p.classType} ${p.name}\n"
+			sb << "\t${p.classType} ${p.name}${nl}"
 		}
-		sb << "\n"
-		sb << "\tstatic constraints = {\n"
+		sb << "${nl}"
+		sb << "\tstatic constraints = {${nl}"
 		properties.each{ p ->
 			sb << "\t\t${p.name}("
 			sb << "nullable: ${p.nullable}"
 			if (p.minLength) { sb << ", minSize:${p.minLength}" }
 			if (p.maxLength) { sb << ", maxSize:${p.maxLength}" }
 			if (p.pattern) { sb << ', matches:"' + p.pattern + '"' }
-			sb <<")\n"
+			sb <<")${nl}"
 		}
-		sb << "\t}\n"
-		sb << "\tstatic constraints = {\n"
-		sb << "\t\ttable '${tableName}'\n"
-		sb << "\t}\n"
-		sb << "}\n"
-		return sb.toString()
+		sb << "\t}${nl}"
+		sb << "\tstatic constraints = {${nl}"
+		sb << "\t\ttable '${tableName}'${nl}"
+		sb << "\t}${nl}"
+		sb << "}${nl}"
+		return sb
 	}
 }

@@ -11,8 +11,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-//import edu.umn.enhs.xsd.GormParser
-//import edu.umn.enhs.xsd.MetaData
 
 USAGE = """
 Usage: grails xsd-to-gorm <xsd-file-to-process>
@@ -22,6 +20,8 @@ Creates domain classes from XSD file definition(s)
 Example: grails xsd-to-gorm My-Company-Schema-v0.2.3.4.xsd
 """
 
+includeTargets << grailsScript('_GrailsInit')
+includeTargets << grailsScript('_GrailsCreateArtifacts')
 includeTargets << grailsScript('_GrailsBootstrap')
 includeTargets << grailsScript('Compile')
 
@@ -62,23 +62,41 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	// Load tables/domain classes
 	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, simpleTypeList, enumTypeList)
 
-	// dump out domain class information
-	gormDomainList[0..9].each{ gormDomain ->
-		// TODO: make sure package has matching folder, else create folder
-		// TODO: construct filename for domain class 
-		// TODO: open file, write contents, close file
-		println "***************************"
-		println "Found domain: ${gormDomain}"
-		println "***************************"
-		println gormDomain.generateClassDefinition()
-
-		// Write domain classes for Enums
+	// dump out enumeration domain class information
+	enumTypeList[0..5].each{ enumType ->
+		printMessage "Creating ${enumType.classPath}"
+		createArtifact(name: enumType.classPath, suffix: "", type: "DomainClass", path: "grails-app/domain")
+		printMessage "Writing properties to ${enumType.pathName}"
+		// Over-write the contents via newWriter() method (Thanks Guillaume!)
+		def gormDomainFile = new File(enumType.pathName).newWriter()
+		gormDomainFile << enumType.generateClassDefinition()
+		gormDomainFile.close()
 	}
 
-	// TODO: Create GORM domain classes
-	// createDomainClassesFromDefinitions(xsdDefinitions)
+	// dump out domain class information
+	gormDomainList[0..5].each{ gormDomain ->
+		printMessage "Creating ${gormDomain}"
+		createArtifact(name: gormDomain.classPath, suffix: "", type: "DomainClass", path: "grails-app/domain")
+		printMessage "Writing properties to ${gormDomain.pathName}"
+		// Over-write the contents via newWriter() method (Thanks Guillaume!)
+		def gormDomainFile = new File(gormDomain.pathName).newWriter()
+		gormDomainFile << gormDomain.generateClassDefinition()
+		gormDomainFile.close()
+	}
+
 	// TODO: Create BootStrap data
-	// createBootStrapDataFromEnums(enumTypeList)
+	printMessage "Creating enumeration Bootstrap code"
+
+	String bootStrapFile = new File('grails-app/conf/BootStrapXsd.groovy')
+	enumTypeList[0..5].each{ enumType ->
+		println "import ${enumType.classPath}"
+	}
+	enumTypeList[0..5].each{ enumType ->
+		enumType.values.each{ enumValue ->
+			def varName = enumType.className.toLowerCase() + enumValue.name
+			println "def ${varName} = ${enumType.className}.${enumValue.bootStrapCode}"
+		
+	}
 
 }
 

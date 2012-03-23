@@ -36,4 +36,14 @@ class EnumValue {
 			masterClass = xmlElement.'@ncsdoc:master_cl'.text()
 		}
 	}
+
+	String getBootStrapCode() {
+		def fos = new StringBuilder()
+		fos << "findOrSaveWhere("
+		fos << "value: ${value},"
+		fos << "label: '${label}',"
+		fos << "masterClass: '${masterClass}',"
+		fos << "globalValue: '${globalValue}',"
+		fos << "description: '${description}')"
+	}
 }
