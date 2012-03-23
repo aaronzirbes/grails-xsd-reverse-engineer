@@ -1,6 +1,5 @@
 package edu.umn.enhs.xsd
 
-import grails.util.GrailsNameUtils
 import groovy.util.slurpersupport.GPathResult
 import javax.xml.bind.UnmarshalException
 
@@ -38,7 +37,7 @@ class GormDomain {
 			// get data from type
 			tableName = xmlElement.@name.text()
 			// convert tablename to camel case
-			className = GrailsNameUtils.getClassNameForLowerCaseHyphenSeparatedName(tableName.replace('_', '-'))
+			className = XsdUtils.getClassName(tableName)
 
 			// load table wide constraints
 			try {
@@ -104,8 +103,11 @@ class GormDomain {
 			sb <<")${nl}"
 		}
 		sb << "\t}${nl}"
-		sb << "\tstatic constraints = {${nl}"
+		sb << "\tstatic mapping = {${nl}"
 		sb << "\t\ttable '${tableName}'${nl}"
+		properties.each{ p ->
+			sb << "\t\t${p.name} column:'${p.columnName}'${nl}"
+		}
 		sb << "\t}${nl}"
 		sb << "}${nl}"
 		return sb

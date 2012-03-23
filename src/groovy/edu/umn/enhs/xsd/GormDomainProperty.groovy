@@ -1,6 +1,5 @@
 package edu.umn.enhs.xsd
 
-import grails.util.GrailsNameUtils
 import groovy.util.slurpersupport.GPathResult
 import javax.xml.bind.UnmarshalException
 
@@ -64,8 +63,8 @@ class GormDomainProperty {
 			}
 
 			// convert column name to camel case
-			name = GrailsNameUtils.getClassNameForLowerCaseHyphenSeparatedName(columnName.replace('_', '-'))
-			name = GrailsNameUtils.getPropertyNameRepresentation(name)
+			name = XsdUtils.getPropertyName(columnName)
+
 			// get data type
 			def type = xmlElement.@type.text()
 			// find type

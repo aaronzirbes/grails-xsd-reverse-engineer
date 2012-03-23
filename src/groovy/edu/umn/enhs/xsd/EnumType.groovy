@@ -1,6 +1,5 @@
 package edu.umn.enhs.xsd
 
-import grails.util.GrailsNameUtils
 import groovy.util.slurpersupport.GPathResult
 import javax.xml.bind.UnmarshalException
 
@@ -46,7 +45,7 @@ class EnumType {
 			// get data from type
 			tableName = xmlElement.@name.text()
 			// convert table name to camel case
-			className = GrailsNameUtils.getClassNameForLowerCaseHyphenSeparatedName(tableName.replace('_', '-'))
+			className = XsdUtils.getClassName(tableName)
 			// load the Enum Values
 			values = new ArrayList<EnumValue>()
 			xmlElement.'xs:restriction'.'xs:enumeration'.list().each{
@@ -94,13 +93,13 @@ class EnumType {
 		sb << "\tString description${nl}"
 		sb << "${nl}"
 		sb << "\tstatic constraints = {${nl}"
-		sb << "\t\tvalue(unique:true)${nl}"
+		sb << "\t\tvalue(index:'ix_value')${nl}"
 		sb << "\t\tlabel(maxLength:255)${nl}"
 		sb << "\t\tmasterClass(nullable:true, maxLength:255)${nl}"
 		sb << "\t\tglobalValue(nullable:true, maxLength:255)${nl}"
 		sb << "\t\tdescription(nullable:true, maxLength:255)${nl}"
 		sb << "\t}${nl}"
-		sb << "\tstatic constraints = {${nl}"
+		sb << "\tstatic mapping = {${nl}"
 		sb << "\t\ttable '${tableName}'${nl}"
 		sb << "\t\tmasterClass column: 'master_cl'${nl}"
 		sb << "\t\tdescription column: 'desc'${nl}"

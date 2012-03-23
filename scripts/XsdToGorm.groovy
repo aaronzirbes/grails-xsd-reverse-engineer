@@ -100,9 +100,15 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 		bsw << "import ${enumType.classPath}${nl}"
 	}
 	bsw << "${nl}"
+	def varNum = 0
 	enumTypeList.each{ enumType ->
 		enumType.values.each{ enumValue ->
-			def varName = enumType.className.toLowerCase() + enumValue.value.toString().replaceAll('-', 'Neg')
+			varNum++
+
+			def varName = enumType.className.toLowerCase() 
+			varName += "_${varNum}_" 
+			varName += enumValue.value.toString().replaceAll('-', 'Neg')
+
 			if (grailsMajorVersion > 1) {
 				// Grails 2.x code
 				bsw << "def ${varName} = ${enumType.className}"
