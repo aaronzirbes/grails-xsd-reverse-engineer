@@ -5,4 +5,5 @@ web-app/WEB-INF/tld/fmt.tld
 grails-app/conf/BootStrapXsd.groovy
 grails-app/domain/
 *.swp
-
+*.zip
+plugin.xml

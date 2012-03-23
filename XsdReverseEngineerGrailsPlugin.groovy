@@ -1,4 +1,4 @@
-class XsdGrailsPlugin {
+class XsdReverseEngineerGrailsPlugin {
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
@@ -7,11 +7,13 @@ class XsdGrailsPlugin {
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-        "grails-app/views/error.gsp"
+        "grails-app/views/error.gsp",
+        "grails-app/domain/**",
+        "grails-app/conf/BootStrapXsd.groovy"
     ]
 
     // TODO Fill in these fields
-    def title = "Xsd Plugin" // Headline display name of the plugin
+    def title = "Xsd Reverse Engineering Plugin" // Headline display name of the plugin
     def author = "Aaron J. Zirbes"
     def authorEmail = "aaron.zirbes@gmail.com"
     def description = '''\
@@ -19,7 +21,7 @@ Convert XSD document to GORM objects
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/xsd"
+    def documentation = "http://grails.org/plugin/xsd-reverse-engineer"
 
     // Extra (optional) plugin metadata
 
