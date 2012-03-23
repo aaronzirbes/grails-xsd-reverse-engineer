@@ -100,7 +100,7 @@ class GormDomain {
 			sb << "nullable: ${p.nullable}"
 			if (p.minLength) { sb << ", minSize:${p.minLength}" }
 			if (p.maxLength) { sb << ", maxSize:${p.maxLength}" }
-			if (p.pattern) { sb << ', matches:"' + p.pattern + '"' }
+			if (p.pattern) { sb << ', matches:"' + p.pattern.replaceAll('\\\\',{'\\\\'}) + '"' }
 			sb <<")${nl}"
 		}
 		sb << "\t}${nl}"

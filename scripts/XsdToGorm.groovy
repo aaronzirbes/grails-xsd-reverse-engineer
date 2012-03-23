@@ -35,12 +35,20 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 		return 1
 	}
 	String xmlSchema = 'http://www.w3.org/2001/XMLSchema'
+	def nl = System.getProperty("line.separator")
 
 	def GormParser = classLoader.loadClass("edu.umn.enhs.xsd.GormParser", true)
 	def MetaData = classLoader.loadClass("edu.umn.enhs.xsd.MetaData", true)
 
 	def xsdSourceFile = new File(xsdSourceFilePath)
 
+	// Get the Grails major version
+	Integer grailsMajorVersion = 0
+	try {
+		grailsMajorVersion = grailsVersion[0].toInteger()
+	} catch (NumberFormatException ex) {
+		grailsMajorVersion = 1
+	}
 	// Parse the XML
 	def xmlDoc = new XmlSlurper().parse(xsdSourceFile)
 		.declareNamespace(xs: xmlSchema)
@@ -63,7 +71,7 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, simpleTypeList, enumTypeList)
 
 	// dump out enumeration domain class information
-	enumTypeList[0..5].each{ enumType ->
+	enumTypeList.each{ enumType ->
 		printMessage "Creating ${enumType.classPath}"
 		createArtifact(name: enumType.classPath, suffix: "", type: "DomainClass", path: "grails-app/domain")
 		printMessage "Writing properties to ${enumType.pathName}"
@@ -74,7 +82,7 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	}
 
 	// dump out domain class information
-	gormDomainList[0..5].each{ gormDomain ->
+	gormDomainList.each{ gormDomain ->
 		printMessage "Creating ${gormDomain}"
 		createArtifact(name: gormDomain.classPath, suffix: "", type: "DomainClass", path: "grails-app/domain")
 		printMessage "Writing properties to ${gormDomain.pathName}"
@@ -84,22 +92,40 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 		gormDomainFile.close()
 	}
 
-	// TODO: Create BootStrap data
-	printMessage "Creating enumeration Bootstrap code"
-
-	String bootStrapFile = new File('grails-app/conf/BootStrapXsd.groovy')
-	enumTypeList[0..5].each{ enumType ->
-		println "import ${enumType.classPath}"
+	// Create BootStrap data
+	def bootStrapFile = new File('grails-app/conf/BootStrapXsd.groovy')
+	def bsw = bootStrapFile.newWriter()
+	printMessage "Creating: ${bootStrapFile}"
+	enumTypeList.each{ enumType ->
+		bsw << "import ${enumType.classPath}${nl}"
 	}
-	enumTypeList[0..5].each{ enumType ->
+	bsw << "${nl}"
+	enumTypeList.each{ enumType ->
 		enumType.values.each{ enumValue ->
-			def varName = enumType.className.toLowerCase() + enumValue.name
-			println "def ${varName} = ${enumType.className}.${enumValue.bootStrapCode}"
-		
+			def varName = enumType.className.toLowerCase() + enumValue.value.toString().replaceAll('-', 'Neg')
+			if (grailsMajorVersion > 1) {
+				// Grails 2.x code
+				bsw << "def ${varName} = ${enumType.className}"
+				bsw << ".findOrSaveWhere(${enumValue.bootStrapCode})${nl}"
+			} else {
+				// Grails 1.3.x code
+				bsw << "def ${varName} = ${enumType.className}"
+				bsw << ".findWhere(${enumValue.bootStrapCode})${nl}"
+				bsw << "if ( ! ${varName} ) {${nl}"
+				bsw << "\t${varName} = new ${enumType.className}(${enumValue.bootStrapCode}).save()${nl}"
+				bsw << "}${nl}"
+			}
+		}
 	}
+	bsw.close()
+	finalMessage "Created: ${bootStrapFile}"
+	finalMessage "NOTE: Don't forget to add the contents of ${bootStrapFile}"
+	finalMessage "      to the init section of your grails-app/conf/BootStrap.groovy file."
 
 }
 
+/** Helper for printing informational messages */
+finalMessage = { String message -> event('StatusFinal', [message]) }
 /** Helper for printing informational messages */
 printMessage = { String message -> event('StatusUpdate', [message]) }
 /** Helper for printing error messages */

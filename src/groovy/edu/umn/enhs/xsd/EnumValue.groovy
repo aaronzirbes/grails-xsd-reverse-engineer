@@ -38,12 +38,13 @@ class EnumValue {
 	}
 
 	String getBootStrapCode() {
+		def nl = System.getProperty("line.separator")
 		def fos = new StringBuilder()
-		fos << "findOrSaveWhere("
-		fos << "value: ${value},"
-		fos << "label: '${label}',"
-		fos << "masterClass: '${masterClass}',"
-		fos << "globalValue: '${globalValue}',"
-		fos << "description: '${description}')"
+
+		fos << "value: ${value}, ${nl}"
+		fos << "\tlabel: \"${label.replaceAll('\\$',/\\\$/)}\", ${nl}"
+		fos << "\tmasterClass: \"${masterClass}\", ${nl}"
+		fos << "\tglobalValue: \"${globalValue}\", ${nl}"
+		fos << "\tdescription: \"${description}\""
 	}
 }
