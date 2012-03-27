@@ -30,10 +30,10 @@ class EnumValue {
 			} catch (NumberFormatException ex) {
 				value = null
 			}
-			label = xmlElement.'@ncsdoc:label'.text()
-			description = xmlElement.'@ncsdoc:desc'.text()
-			globalValue = xmlElement.'@ncsdoc:global_value'.text()
-			masterClass = xmlElement.'@ncsdoc:master_cl'.text()
+			label = xmlElement.'@*:label'.text()
+			description = xmlElement.'@*:desc'.text()
+			globalValue = xmlElement.'@*:global_value'.text()
+			masterClass = xmlElement.'@*:master_cl'.text()
 		}
 	}
 
