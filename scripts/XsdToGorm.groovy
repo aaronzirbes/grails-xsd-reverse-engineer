@@ -26,6 +26,7 @@ includeTargets << grailsScript('_GrailsBootstrap')
 includeTargets << grailsScript('Compile')
 
 xsdSourceFilePath = ''
+Boolean enumsAsDomainClasses = true
 
 /** The primary target */
 target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {

@@ -64,6 +64,8 @@ class GormDomainProperty {
 
 			// convert column name to camel case
 			name = XsdUtils.getPropertyName(columnName)
+			// Remove non-SQL names from column name
+			columnName = XsdUtils.getColumnName(columnName)
 
 			// get data type
 			def type = xmlElement.@type.text()
