@@ -84,12 +84,6 @@ class GormDomain {
 		sb << "/** Generated from Grails XSD plugin */${nl}"
 		sb << "class ${className} {${nl}${nl}"
 		properties.each{ p ->
-			if (p.pii || p.status) {
-				sb << "\t/**${nl}"
-				if (p.pii) { sb << "\t * PII level ${p.pii}${nl}" }
-				if (p.status) { sb << "\t * Status level ${p.status}${nl}" }
-				sb << "\t */${nl}"
-			}
 			sb << "\t${p.classType} ${p.name}${nl}"
 		}
 		sb << "${nl}"

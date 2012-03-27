@@ -14,10 +14,6 @@ class GormDomainProperty {
 	Integer minOccurs
 	// type or xs:simpleType
 	String classType
-	// ncsdoc:pii
-	String pii = false
-	// ncsdoc:status
-	Integer status
 	// Minimum length
 	Integer minLength
 	// Maximum length
@@ -52,14 +48,6 @@ class GormDomainProperty {
 				minOccurs = xmlElement.@minOccurs.text().toInteger()
 			} catch (NumberFormatException ex) {
 				minOccurs = null
-			}
-			// get PII info
-			pii = xmlElement.'@ncsdoc:pii'.text()
-			// get NCS status
-			try {
-				status = xmlElement.'@ncsdoc:status'.text().toInteger()
-			} catch (NumberFormatException ex) {
-				status = null
 			}
 
 			// convert column name to camel case

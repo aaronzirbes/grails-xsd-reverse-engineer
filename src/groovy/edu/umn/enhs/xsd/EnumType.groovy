@@ -80,7 +80,7 @@ class EnumType {
 
 		sb << "package ${packageName}${nl}${nl}"
 		sb << "/** ${description} */${nl}"
-		sb << "class ${className} {${nl}${nl}"
+		sb << "class ${className} extends XsdEnumerationDefinition {${nl}${nl}"
 		sb << "\t/** The numeric code for this enumeration */${nl}"
 		sb << "\tInteger value${nl}"
 		sb << "\t/** Textual representation of this value */${nl}"

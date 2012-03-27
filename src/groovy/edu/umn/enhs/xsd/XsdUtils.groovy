@@ -103,8 +103,8 @@ class XsdUtils {
 	}
 
 	static String getColumnName(String columnName) {
-		def name
-	   	if (sqlReservedWords.contains(name.toUpperCase())) {
+		def name = columnName
+	   	if (sqlReservedWords.contains(name?.toUpperCase())) {
 			// rename it
 			name += '_'
 		}
