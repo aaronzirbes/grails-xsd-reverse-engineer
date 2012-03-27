@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+import groovy.text.SimpleTemplateEngine
 
 USAGE = """
 Usage: grails xsd-to-gorm <xsd-file-to-process>
@@ -26,6 +27,10 @@ includeTargets << grailsScript('_GrailsBootstrap')
 includeTargets << grailsScript('Compile')
 
 xsdSourceFilePath = ''
+templateAttributes = [:]
+templateDir = "$xsdReverseEngineerPluginDir/src/templates"
+appDir = "$basedir/grails-app"
+templateEngine = new SimpleTemplateEngine()
 
 /** The primary target */
 target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
@@ -69,6 +74,12 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 	}
 	// Load tables/domain classes
 	def gormDomainList = GormParser.parseDomainClasses(xmlDoc, metaData, simpleTypeList, enumTypeList)
+
+	// Generate the abstract class extended by all of the enumerations
+	def packageName = metaData.defaultPackageName
+	templateAttributes.packageName = packageName
+	String dir = packageToDir(packageName)
+	generateFile "$templateDir/XsdEnumerationDefinition.groovy.template", "$appDir/domain/${dir}XsdEnumerationDefinition.groovy"
 
 	// dump out enumeration domain class information
 	enumTypeList.each{ enumType ->
@@ -148,7 +159,8 @@ private boolean configure() {
 	}
 }
 
-/** Parse script arguments */
+/** Parse script arguments.
+  * I stole this code from the Spring Security Core plugin.  Thanks Burt! */
 private parseArgs() {
 	def args = argsMap.params
 	if (args.size() == 1) {
@@ -159,5 +171,40 @@ private parseArgs() {
 	errorMessage USAGE
 	return null
 }
+
+/** Generate a file from a template.
+  * I stole this code from the Spring Security Core plugin.  Thanks Burt! */
+generateFile = { String templatePath, String outputPath ->
+
+	File templateFile = new File(templatePath)
+	if (!templateFile.exists()) {
+		errorMessage "\nERROR: $templatePath doesn't exist"
+		return
+	}
+
+	File outFile = new File(outputPath)
+
+	// in case it's in a package, create dirs
+	ant.mkdir dir: outFile.parentFile
+
+	outFile.withWriter { writer ->
+		templateEngine.createTemplate(templateFile.text).make(templateAttributes).writeTo(writer)
+	}
+
+	printMessage "generated $outFile.absolutePath"
+}
+
+/** This converts a package name to a folder path.
+  * I stole this code from the Spring Security Core plugin.  Thanks Burt! */
+packageToDir = { String packageName ->
+	String dir = ''
+	if (packageName) {
+		dir = packageName.replaceAll('\\.', '/') + '/'
+	}
+
+	return dir
+}
+
+
 
 setDefaultTarget 'xsdToGorm'
