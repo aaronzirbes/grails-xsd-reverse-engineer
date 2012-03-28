@@ -77,6 +77,10 @@ class GormDomain {
 	}
 
 	String generateClassDefinition() {
+		return generateClassDefinition(true)
+	}
+
+	String generateClassDefinition(Boolean enumsAsDomainClasses) {
 		def sb = new StringBuilder()
 		def nl = System.getProperty("line.separator")
 
@@ -84,13 +88,18 @@ class GormDomain {
 		sb << "/** Generated from Grails XSD plugin */${nl}"
 		sb << "class ${className} {${nl}${nl}"
 		properties.each{ p ->
-			sb << "\t${p.classType} ${p.name}${nl}"
+			if (p.enumProperty && !enumsAsDomainClasses) {
+				sb << "\tInteger ${p.name}${nl}"
+			} else {
+				sb << "\t${p.classType} ${p.name}${nl}"
+			}
 		}
 		sb << "${nl}"
 		sb << "\tstatic constraints = {${nl}"
 		properties.each{ p ->
 			sb << "\t\t${p.name}("
 			sb << "nullable: ${p.nullable}"
+			if (!enumsAsDomainClasses && p.inListConstraint) { sb << ", inList:[${p.inListConstraint}]" }
 			if (p.minLength) { sb << ", minSize:${p.minLength}" }
 			if (p.maxLength) { sb << ", maxSize:${p.maxLength}" }
 			if (p.pattern) { sb << ', matches:"' + p.pattern.replaceAll('\\\\',{'\\\\'}) + '"' }

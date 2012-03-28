@@ -20,7 +20,11 @@ class GormDomainProperty {
 	Integer maxLength
 	// restrictive pattern
 	String pattern
-	// standard XML schema type map
+	// Flags whether or not this is an enumeration property
+	Boolean enumProperty = false
+	// inList constraint for enum types (if not rendered as domain classes)
+	String inListConstraint
+	// Static map to define xd: types as Java types
 	static xdTypeMap = [
 			string: 'String',
 			int: 'Integer',
@@ -75,7 +79,12 @@ class GormDomainProperty {
 						(minLength, maxLength, pattern) = simpleType.constraints
 					} else {
 						// we only need the classType for an Enum type
-						classType = enumTypes.find{ it.tableName == typeName }?.className
+						EnumType enumType = enumTypes.find{ it.tableName == typeName }
+						if (enumType) {
+							classType = enumType.className
+							enumProperty = true
+							inListConstraint = enumType.values.collect{it.value.toString()}.join(', ')
+						}
 					}
 				}
 			} else {

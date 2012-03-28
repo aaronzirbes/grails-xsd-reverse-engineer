@@ -1,9 +1,10 @@
+*.swp
+*.xsd
+*.zip
+grails-app/conf/BootStrapXsd.groovy
+grails-app/conf/bootstrap_xsd.sql
+grails-app/domain/
+plugin.xml
 target/
 web-app/WEB-INF/tld/c.tld
 web-app/WEB-INF/tld/fmt.tld
-*.xsd
-grails-app/conf/BootStrapXsd.groovy
-grails-app/domain/
-*.swp
-*.zip
-plugin.xml

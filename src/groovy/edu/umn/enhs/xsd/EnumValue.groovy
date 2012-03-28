@@ -37,6 +37,17 @@ class EnumValue {
 		}
 	}
 
+	String getSqlValues() {
+		def nl = System.getProperty("line.separator")
+		def fos = new StringBuilder()
+
+		fos << ( "${value}, " )
+		fos << ( "'" + label.replaceAll("'","''") + "', " )
+		fos << ( "'" + masterClass.replaceAll("'","''") + "', " )
+		fos << ( "'" + globalValue.replaceAll("'","''") + "', " )
+		fos << ( "'" + description.replaceAll("'","''") + "' " )
+	}
+
 	String getBootStrapCode() {
 		def nl = System.getProperty("line.separator")
 		def fos = new StringBuilder()
