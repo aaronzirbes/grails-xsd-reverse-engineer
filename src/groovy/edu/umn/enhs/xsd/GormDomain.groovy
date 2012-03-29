@@ -95,6 +95,9 @@ class GormDomain {
 			}
 		}
 		sb << "${nl}"
+		sb << "\tpublic static final boolean DOMAIN_CLASS_FROM_XSD = true${nl}"
+		sb << "\tpublic static final String XSD_TABLE_NAME = \"${tableName}\"${nl}"
+		sb << "${nl}"
 		sb << "\tstatic constraints = {${nl}"
 		properties.each{ p ->
 			sb << "\t\t${p.name}("
