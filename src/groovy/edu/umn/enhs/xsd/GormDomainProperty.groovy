@@ -6,6 +6,8 @@ import javax.xml.bind.UnmarshalException
 class GormDomainProperty {
 	// name of domain property
 	String name
+	// name of xml element
+	String elementName
 	// name of column
 	String columnName
 	// nillable
@@ -39,12 +41,12 @@ class GormDomainProperty {
 
 	/** constructor from xmlElement and known types */
 	GormDomainProperty(GPathResult xmlElement, Collection<SimpleType> simpleTypes, Collection<EnumType> enumTypes) {
-		def elementName = xmlElement?.name()
-		if (elementName != 'element') {
-			throw new UnmarshalException("expected element xs:element, got ${elementName}")
+		def elemName = xmlElement?.name()
+		if (elemName != 'element') {
+			throw new UnmarshalException("expected element xs:element, got ${elemName}")
 		} else {
 			// get column name
-			columnName = xmlElement.@name.text()
+			elementName = xmlElement.@name.text()
 			// get nullable
 			nullable = xmlElement.@nillable.text().toBoolean()
 			// get minOccurs
@@ -55,9 +57,9 @@ class GormDomainProperty {
 			}
 
 			// convert column name to camel case
-			name = XsdUtils.getPropertyName(columnName)
+			name = XsdUtils.getPropertyName(elementName)
 			// Remove non-SQL names from column name
-			columnName = XsdUtils.getColumnName(columnName)
+			columnName = XsdUtils.getColumnName(elementName)
 
 			// get data type
 			def type = xmlElement.@type.text()
@@ -96,7 +98,7 @@ class GormDomainProperty {
 
 			// Throw an error if we couldn't find the type
 			if (! classType) {
-				throw new UnmarshalException("unknown type: ${type} for ${columnName}")
+				throw new UnmarshalException("unknown type: ${type} for ${elementName}")
 			}
 		}
 	}
