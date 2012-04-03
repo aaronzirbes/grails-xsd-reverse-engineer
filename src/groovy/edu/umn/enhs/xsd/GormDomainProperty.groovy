@@ -26,18 +26,64 @@ class GormDomainProperty {
 	Boolean enumProperty = false
 	// inList constraint for enum types (if not rendered as domain classes)
 	String inListConstraint
+
 	// Static map to define xd: types as Java types
 	static xdTypeMap = [
 			string: 'String',
 			int: 'Integer',
+			bigint: 'BigInteger',
 			boolean: 'Boolean',
 			decimal: 'BigDecimal',
 			float: 'Float',
+			long: 'Long',
 			double: 'Double'
+		]
+	
+	static xdStringConversionMap = [
+			'String': '',
+			'Integer': '.toInteger()',
+			'BigInteger': '.toBigInteger()',
+			'Boolean': '.toBoolean()',
+			'Decimal': '.toDecimal()',
+			'BigDecimal': '.toBigDecimal()',
+			'Float': '.toFloat()',
+			'Long': '.toLong()', 
+			'Double': '.toDouble()'
 		]
 
 	// default toString converter
 	String toString() { name }
+
+	// returns the data type used for this element
+	String groovyType(boolean enumsAsDomainClasses) {
+		if (enumProperty && !enumsAsDomainClasses) {
+			"Integer ${name}"
+		} else {
+			"${classType} ${name}"
+		}
+	}
+
+	String constraint(boolean enumsAsDomainClasses) {
+		def sb = new StringBuilder()
+		sb << "${name}("
+		sb << "nullable: ${nullable}"
+		if (!enumsAsDomainClasses && inListConstraint) { sb << ", inList:[${inListConstraint}]" }
+		if (minLength) { sb << ", minSize:${minLength}" }
+		if (maxLength) { sb << ", maxSize:${maxLength}" }
+		if (pattern) { sb << ', matches:"' + pattern.replaceAll('\\\\',{'\\\\'}) + '"' }
+		sb << ")"
+
+		return sb.toString()
+	}
+
+	// The default String to native converter for this property
+	String getStringConverter(boolean enumsAsDomainClasses) {
+		if (enumProperty && !enumsAsDomainClasses) {
+			".toInteger()"
+		} else {
+			xdStringConversionMap[classType] ?: ''
+		}
+	}
 
 	/** constructor from xmlElement and known types */
 	GormDomainProperty(GPathResult xmlElement, Collection<SimpleType> simpleTypes, Collection<EnumType> enumTypes) {

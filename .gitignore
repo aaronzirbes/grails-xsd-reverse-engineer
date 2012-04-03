@@ -9,5 +9,4 @@ plugin.xml
 target/
 web-app/
 sample.xml
-small-sample.xml
-tiny-sample.xml
+*-sample.xml

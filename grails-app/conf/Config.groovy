@@ -20,5 +20,7 @@ log4j = {
            'org.hibernate',
            'net.sf.ehcache.hibernate'
 
+	debug  'grails.app.domain.gov.nationalchildrensstudy'
+
     warn   'org.mortbay.log'
 }

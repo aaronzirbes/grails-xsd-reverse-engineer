@@ -1,0 +1,63 @@
+package ${gormDomain.packageName}
+
+import javax.xml.stream.XMLStreamException
+import javax.xml.stream.XMLStreamReader
+
+/** Generated from Grails XSD plugin */
+class ${gormDomain.className} {
+<% gormDomain.properties.each { p -> %>
+	${p.groovyType(enumsAsDomainClasses)}<% } %>
+	public static final boolean DOMAIN_CLASS_FROM_XSD = true
+	public static final String XSD_TABLE_NAME = "${gormDomain.tableName}"
+
+	public ${gormDomain.className}(XMLStreamReader reader, boolean strict) {
+		if (reader.startElement) {
+			if (reader.localName() == XSD_TABLE_NAME) {
+				// We're in the table, load the first column
+				if ( reader.hasNext() ) { reader.next() }
+
+				while ( reader.hasNext() ) {
+					if ( reader.endElement ) {
+						if (reader.localName() == XSD_TABLE_NAME) {
+							break
+						}
+					} else if ( reader.startElement ) {
+						String elementName = reader.localName()
+						String elementText = reader.text()
+						if ( elementText ) {
+							switch ( elementName ) {
+<% gormDomain.properties.each { p -> %>
+								case '${p.elementName}':
+									${p.name} = elementText${p.getStringConverter(enumsAsDomainClasses)}
+									break<% } %>
+								default:
+									if (strict) {
+										throw new XMLStreamException(
+											"malformed XML, unknown element: \${elementText}")
+									} else {
+										log.warn "Element: \${elementName} unknown, ignoring."
+									}
+									break
+							}
+						}
+					}
+					reader.next()
+				}
+			} else {
+				throw new XMLStreamException("xml element did not start as \${XSD_TABLE_NAME}")
+			}
+		} else {
+			throw new XMLStreamException("constructor must be passed the start element for the table in the XMLStreamReader")
+		}
+	}
+
+	static constraints = {
+<% gormDomain.properties.each { p -> %>
+		${p.constraint(enumsAsDomainClasses)}<% } %>
+	}
+	static mapping = {
+		table '${gormDomain.tableName}'
+<% gormDomain.properties.each { p -> %>
+		${p.name} column:'${p.columnName}'<% } %>
+	}
+}

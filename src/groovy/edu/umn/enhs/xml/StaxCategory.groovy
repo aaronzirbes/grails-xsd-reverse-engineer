@@ -3,8 +3,11 @@ package edu.umn.enhs.xml
 import javax.xml.stream.XMLStreamReader
 
 class StaxCategory {
-	static Object get(XMLStreamReader self, String key) {
-		return self.getAttributeValue(null, key)
+	static String prefix(XMLStreamReader self) {
+		return self.prefix.toString()
+	}
+	static String localName(XMLStreamReader self) {
+		return self.localName.toString()
 	}
 	static String name(XMLStreamReader self) {
 		return self.name.toString()

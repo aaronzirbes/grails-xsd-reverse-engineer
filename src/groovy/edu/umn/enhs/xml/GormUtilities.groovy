@@ -4,6 +4,7 @@ import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
+import org.springframework.validation.FieldError
 
 class GormUtilities {
 
@@ -24,6 +25,10 @@ class GormUtilities {
 	}
 
 	private Map xmlTablesToDomainClasses = [:]
+
+	Map getXmlToDomainClassMap() {
+		xmlTablesToDomainClasses
+	}
 
 	/** Returns all grails domain classes that can be parsed from XML */
 	private loadXmlToDomainClassMap() {
@@ -77,7 +82,7 @@ class GormUtilities {
 	private boolean processStartElement(element, boolean strict) {
 		// Processing a com.ctc.wstx.sr.ValidatingStreamReader
 
-		String elementName = element.name()
+		String elementName = element.localName()
 		boolean readElement = false
 		if (xmlTablesToDomainClasses.keySet().contains(elementName)) {
 			readElement = true
@@ -86,15 +91,24 @@ class GormUtilities {
 			printMessage "Marshalling ${className}"
 			// create  a new instance using the class loader
 			def XsdGormClass = classLoader.loadClass(className, true)
-			// call the XMLStreamReader constructor for the class, strict XML
-			def classInstance = XsdGormClass.newInstance(element, strict)
-			if ( ! classInstance) {
-				errorMessage "Unable to create new ${className}"
-			} else {
-				if ( ! classInstance.save() ) {
-					errorMessage "Unable to save ${className}"
-					classInstance.errors.each{
-						errorMessage it
+			// We need a transaction to ensure that there's a hibernate session
+			XsdGormClass.withTransaction{
+				// call the XMLStreamReader constructor for the class, strict XML
+				def classInstance = XsdGormClass.newInstance(element, strict)
+				if ( ! classInstance) {
+					errorMessage "Unable to create new ${className}"
+				} else {
+					if ( ! classInstance.save() ) {
+						errorMessage "Unable to save ${className}"
+						classInstance.errors.allErrors.each{
+							if (it instanceof FieldError) {
+								errorMessage "${it.objectName} rejected value '${it.rejectedValue}' for field ${it.field}"
+							} else {
+								errorMessage it.toString()
+							}
+						}
+					} else {
+						printMessage "Imported data to ${className}"
 					}
 				}
 			}

@@ -116,10 +116,7 @@ target(xsdToGorm: 'Generates domain classes from XSD file definition(s)') {
 		printMessage "Creating ${gormDomain}"
 		createArtifact(name: gormDomain.classPath, suffix: "", type: "DomainClass", path: "grails-app/domain")
 		printMessage "Writing properties to ${gormDomain.pathName}"
-		// Over-write the contents via newWriter() method (Thanks Guillaume!)
-		def gormDomainFile = new File(gormDomain.pathName).newWriter()
-		gormDomainFile << gormDomain.generateClassDefinition(enumsAsDomainClasses)
-		gormDomainFile.close()
+		generateGormDomainFile gormDomain
 	}
 
 	// Create BootStrap data
@@ -267,6 +264,30 @@ private parseArgs() {
 	return null
 }
 
+/** Generate a XSD GormDomain from a template. */
+generateGormDomainFile = { gormDomain ->
+	// Over-write the contents via newWriter() method (Thanks Guillaume!)
+	def gormDomainFile = new File(gormDomain.pathName)
+	String templatePath = "$templateDir/GormDomain.groovy.template"
+
+	File templateFile = new File(templatePath)
+	if (!templateFile.exists()) {
+		errorMessage "\nERROR: $templatePath doesn't exist"
+		return
+	}
+
+	// in case it's in a package, create dirs
+	ant.mkdir dir: gormDomainFile.parentFile
+
+	def model = [gormDomain: gormDomain, enumsAsDomainClasses: enumsAsDomainClasses ]
+
+	gormDomainFile.withWriter { writer ->
+		templateEngine.createTemplate(templateFile.text).make(model).writeTo(writer)
+	}
+
+	printMessage "generated ${gormDomainFile.absolutePath}"
+}
+
 /** Generate a file from a template.
   * I stole this code from the Spring Security Core plugin.  Thanks Burt! */
 generateFile = { String templatePath, String outputPath ->
@@ -286,7 +307,7 @@ generateFile = { String templatePath, String outputPath ->
 		templateEngine.createTemplate(templateFile.text).make(templateAttributes).writeTo(writer)
 	}
 
-	printMessage "generated $outFile.absolutePath"
+	printMessage "generated ${outFile.absolutePath}"
 }
 
 /** This converts a package name to a folder path.

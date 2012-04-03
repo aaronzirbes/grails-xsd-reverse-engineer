@@ -52,8 +52,13 @@ target(importXmlData: 'Generates domain classes from XSD file definition(s)') {
 	def GormUtilities = classLoader.loadClass("edu.umn.enhs.xml.GormUtilities", true)
 	// Instantiate the utility class and pass the grailsApplication instance
 	def gormUtilities = GormUtilities.newInstance(grailsApp)
+
+	if ( ! gormUtilities.getXmlToDomainClassMap() ) {
+		errorMessage "Warning, no XSD enabled domain classes found!  Did you generate domain classes from an XSD document first?"
+		return false
+	}
 	// Do some output magic...
-	gormUtilities.printMessage = { String message -> event('StatusFinal', [message]) }
+	gormUtilities.printMessage = { String message -> event('StatusUpdate', [message]) }
 	gormUtilities.errorMessage = { String message -> event('StatusError', [message]) }
 	gormUtilities.finalMessage = { String message -> event('StatusFinal', [message]) }
 
@@ -103,6 +108,5 @@ private parseArgs() {
 	errorMessage USAGE
 	return null
 }
-
 
 setDefaultTarget 'importXmlData'
