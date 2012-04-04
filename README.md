@@ -39,9 +39,9 @@ Many of these settings were drawn from the following blog posts:
 * [techdm](http://techdm.com/grails/?p=87&lang=en)
 * [An Army of Solipsists](http://burtbeckwith.com/blog/?p=73)
 
-1. Reduce the JVM heap size, and turn on the parallel garbage collector
+1. Reduce the JVM heap size (for smaller domain models), and turn on the parallel garbage collector
 
-    export GRAILS_OPTS="-Xmx512m -Xms512m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+UseParallelOldGC"
+    Example: export GRAILS_OPTS="-Xmx512m -Xms512m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+UseParallelOldGC"
 
 2. Turn off hibernate's 2nd level cache in your DataSource config
     hibernate {
