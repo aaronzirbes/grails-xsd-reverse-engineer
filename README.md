@@ -24,3 +24,25 @@ Example
 -------
 
   grails xsd-to-gorm definitions/some-sort-of-xml-schema.0.01.02.xsd
+
+Performance Tuning
+------------------
+
+The following settings can help your application run faster while importing large datasets.
+
+Many of these settings were drawn from the following blog posts:
+* [feeldr](http://memo.feedlr.com/?p=31)
+* [techdm](http://techdm.com/grails/?p=87&lang=en)
+* [An Army of Solipsists](http://burtbeckwith.com/blog/?p=73)
+
+1. Reduce the JVM heap size, and turn on the parallel garbage collector
+
+  export GRAILS\_OPTS="-Xmx512m -Xms512m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+UseParallelOldGC"
+
+2. Turn off hibernate's 2nd level cache in your DataSource config
+   hibernate {
+      cache.use_second_level_cache = false
+      cache.use_query_cache = false
+   }
+
+

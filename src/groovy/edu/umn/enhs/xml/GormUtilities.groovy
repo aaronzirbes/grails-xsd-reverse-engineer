@@ -131,6 +131,9 @@ class GormUtilities {
 						// Bump transaction value
 						saveSuccessCount++
 					}
+					// Discard the domain class in Hibernate's session cache
+					classInstance.discard()
+
 					if (transactionCount % transactionsPerFlush == 0) {
 						// flush the GORM cache to keep memory usage lower
 						// as importing may create a LOT of objects. =)
