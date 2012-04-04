@@ -14,17 +14,17 @@
 
 
 USAGE = """
-Usage: grails import-xml-data [--enums-as-constraint] <xsd-file-to-process>
+Usage: grails import-xml-data [--enums-as-constraint] [--strict] <xml-file-to-process>
 
 Import XML data to domain classes created from XSD schema
 
-    --enums-as-constraint    Will NOT create domain classes for enumeration types, but will instead create 'inList' constraints.
+  --enums-as-constraint    Will NOT create domain classes for enumeration types, but will instead create 'inList' constraints.
+  --strict                 Will throw an exception if unexpected elements are encountered with in a table/domain class.
 
-Example: grails xsd-to-gorm My-Company-Data.xml
-
+Example:
+  grails import-xml-data My-Company-Data.xml
     or
-
-    grails xsd-to-gorm --enums-as-constraint Huge-Company-Data.xml
+  grails import-xml-data --enums-as-constraint --strict Huge-Company-Data.xml
 """
 
 //includeTargets << grailsScript('_GrailsInit')
@@ -84,14 +84,28 @@ errorMessage = { String message -> event('StatusError', [message]) }
 /** Script configuration */
 private boolean configure() {
 	def argValues = parseArgs()
+	def allowedArgs = [ 
+		'--enums-as-constraint',
+		'--strict' ]
+	def argSize = argValues.size()
+
 	if ( !argValues ) {
 		return false
-	} else if (argValues.size() == 1) {
+	} else if (argSize == 1) {
 		xmlDataFilePath = argValues[0]
 		return true
-	} else if (argValues.size() == 2 && argValues[0] == '--enums-as-constraint') {
-		xmlDataFilePath = argValues[1]
-		enumsAsDomainClasses = false
+	} else if (argSize > 1) {
+		xmlDataFilePath = argValues[argSize - 1]
+		argValues[1..-1].each{ arg ->
+			if ( arg == '--enums-as-constraint' ) {
+				enumsAsDomainClasses = false
+			} else if ( arg == '--strict' ) {
+				strict = true
+			} else {
+				errorMessage "Unknown argument: ${arg}"
+				return false
+			}
+		}
 		return true
 	}
 }
@@ -101,7 +115,7 @@ private boolean configure() {
 private parseArgs() {
 	def args = argsMap.params
 	if (args.size() == 1) {
-		printMessage "Creating domain classes from file: ${args[0]}"
+		printMessage "Importing data to domain classes from file: ${args[0]}"
 		return args
 	}
 

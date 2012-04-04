@@ -5,6 +5,7 @@ import javax.xml.stream.XMLStreamReader
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
 import org.springframework.validation.FieldError
+import org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin
 
 class GormUtilities {
 
@@ -16,6 +17,13 @@ class GormUtilities {
 	def printMessage = { it -> println it }
 	def finalMessage = { it -> println it }
 	def errorMessage = { it -> println it }
+
+	def propertyInstanceMap = DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
+
+	Integer transactionCount = 0
+	Integer saveSuccessCount = 0
+	Integer saveFailureCount = 0
+	Integer transactionsPerFlush = 1000
 
 	GormUtilities(GrailsApplication _grailsApplication) {
 		grailsApplication = _grailsApplication;
@@ -53,9 +61,18 @@ class GormUtilities {
 
 	/** Processes an XML stream to import data from */
 	def processXmlStream(InputStream inputStream, boolean strict) {
+		def returnValue
 		use (StaxCategory) {
-			return processStaxStream(inputStream, strict)
+			def startTime = System.currentTimeMillis()
+
+			// process stream
+			returnValue = processStaxStream(inputStream, strict)
+
+			def endTime = System.currentTimeMillis()
+			reportStatus()
+			finalMessage "Finished running in ${endTime - startTime}ms"
 		}
+		return returnValue
 	}
 
 	/** Processes an XML stream in the context of a StaxCategory class */
@@ -98,8 +115,10 @@ class GormUtilities {
 				if ( ! classInstance) {
 					errorMessage "Unable to create new ${className}"
 				} else {
+					transactionCount++
 					if ( ! classInstance.save() ) {
-						errorMessage "Unable to save ${className}"
+						saveFailureCount++
+						errorMessage "Unable to save record #${transactionCount}, ${className}"
 						classInstance.errors.allErrors.each{
 							if (it instanceof FieldError) {
 								errorMessage "${it.objectName} rejected value '${it.rejectedValue}' for field ${it.field}"
@@ -109,10 +128,33 @@ class GormUtilities {
 						}
 					} else {
 						printMessage "Imported data to ${className}"
+						// Bump transaction value
+						saveSuccessCount++
+					}
+					if (transactionCount % transactionsPerFlush == 0) {
+						// flush the GORM cache to keep memory usage lower
+						// as importing may create a LOT of objects. =)
+						cleanUpGorm()
 					}
 				}
 			}
 		}
 		return readElement
+	}
+
+	/** Flushes cache from GORM session.
+	 * See: 
+	 * <a href="http://naleid.com/blog/2009/10/01/batch-import-performance-with-grails-and-mysql/">This blog post</a>.
+	 */
+	private void cleanUpGorm() {
+		reportStatus()
+		def session = grailsApplication.mainContext.sessionFactory.currentSession
+		session.flush()
+		session.clear()
+		propertyInstanceMap.get().clear()
+	}
+	
+	private void reportStatus() {
+		finalMessage "Processed ${transactionCount} records. ${saveSuccessCount} saved, ${saveFailureCount} failed with errors."
 	}
 }
