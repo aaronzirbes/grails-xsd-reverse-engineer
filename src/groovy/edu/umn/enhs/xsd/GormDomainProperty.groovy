@@ -98,6 +98,10 @@ class GormDomainProperty {
 			// get minOccurs
 			try {
 				minOccurs = xmlElement.@minOccurs.text().toInteger()
+				if (minOccurs == 0) {
+					// Alternate nullable field
+					nullable = true
+				}
 			} catch (NumberFormatException ex) {
 				minOccurs = null
 			}
