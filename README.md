@@ -62,6 +62,8 @@ Revision History
 ----------------
 
 * Apr 05, 2012
+  * 0.3.2      - Added support for minOccurs = 0 as a nullable flag in an XSD file
+* Apr 05, 2012
   * 0.3.1      - Added CSV output log for import validation failure errors
 * Apr 04, 2012
   * 0.3.0      - Added XML Data import support
