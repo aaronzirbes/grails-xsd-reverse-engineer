@@ -21,11 +21,11 @@ Example (Structure Creation)
 ----------------
     grails xsd-to-gorm definitions/some-sort-of-xml-schema.0.01.02.xsd
 
-Usage (Import) 
+Usage (Data Import) 
 --------------
-    grails import-xml-data [--enums-as-constraint] [--strict] <path-to-xsd-file>
+    grails import-xml-data [--enums-as-constraint] [--strict] <path-to-xml-file>
 
-Example (Import)
+Example (Data Import)
 ----------------
     grails import-xml-data definitions/xml-data-based-on-schema.0.01.02.xml
 
@@ -41,7 +41,15 @@ Many of these settings were drawn from the following blog posts:
 
 1. Reduce the JVM heap size (for smaller domain models), and turn on the parallel garbage collector
 
-    Example: export GRAILS_OPTS="-Xmx512m -Xms512m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+UseParallelOldGC"
+    Example: GRAILS_OPTS="-Xmx512m -Xms512m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+UseParallelOldGC"
+
+If your domain model is larger (100+ Domain classes), you may need something like...
+
+    Example: GRAILS_OPTS="-Xmx2g -Xms2g -XX:PermSize=1g -XX:MaxPermSize=1g -server"
+
+Mine is pushing 300 models, so I run with:
+
+    GRAILS_OPTS="-Xmx4g -Xms4g -XX:PermSize=2g -XX:MaxPermSize=2g -server"
 
 2. Turn off hibernate's 2nd level cache in your DataSource config
     hibernate {
@@ -49,4 +57,14 @@ Many of these settings were drawn from the following blog posts:
         cache.use_query_cache = false
     }
 
+
+Revision History
+----------------
+
+* Apr 04, 2012
+  * 0.3.0      - Added XML Data import support
+* Mar 29, 2012
+  * 0.2.1      - Added support to create Enums as contraints rather than domain classes
+* Mar 23, 2012
+  * 0.1.0      - Initial GitHub Release 
 
