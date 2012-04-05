@@ -33,10 +33,12 @@ includeTargets << grailsScript('_GrailsBootstrap')
 
 xmlDataFilePath = ''
 templateAttributes = [:]
-appDir = "$basedir/grails-app"
+appDir = "${basedir}/grails-app"
 String packageName = 'org.example'
 Boolean strictXmlParsing = true
 Boolean enumsAsDomainClasses = true
+File dataImportErrorLog = new File("${basedir}/target/xml-import-errors.csv")
+PrintWriter errorLog = dataImportErrorLog.newPrintWriter()
 
 /** The primary target */
 target(importXmlData: 'Generates domain classes from XSD file definition(s)') {
@@ -61,12 +63,23 @@ target(importXmlData: 'Generates domain classes from XSD file definition(s)') {
 	gormUtilities.printMessage = { String message -> event('StatusUpdate', [message]) }
 	gormUtilities.errorMessage = { String message -> event('StatusError', [message]) }
 	gormUtilities.finalMessage = { String message -> event('StatusFinal', [message]) }
+	gormUtilities.logDataError = { recordNumber, className, fieldName, rejectedValue ->
+		errorMessage "${it.className} rejected value '${rejectedValue}' for field ${fieldName}"
+		errorLog.println "${recordNumber},\"${className}\",\"${fieldName}\",\"${rejectedValue}\""
+	}
 
 	def xmlDataFile = new File(xmlDataFilePath)
-	def xmlDataStream = xmlDataFile.newInputStream()
 
 	finalMessage "Loading XML Domain Class information..."
 	def xmlDomains = gormUtilities.loadXmlToDomainClassMap()
+
+	def xmlDataStream = xmlDataFile.newInputStream()
+	if ( ! dataImportErrorLog?.size() ) {
+		// Write Column Headers
+		errorLog.println "element_number,object_name,field_name,rejected_value"
+	}
+
+	finalMessage "Writing XML data import errors to file: ${dataImportErrorLog}"
 
 	finalMessage "Loading data from ${xmlDataFile}..."
 	def elementsProcessed = gormUtilities.processXmlStream(xmlDataStream, strictXmlParsing)

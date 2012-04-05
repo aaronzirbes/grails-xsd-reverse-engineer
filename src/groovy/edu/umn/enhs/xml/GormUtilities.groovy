@@ -17,6 +17,9 @@ class GormUtilities {
 	def printMessage = { it -> println it }
 	def finalMessage = { it -> println it }
 	def errorMessage = { it -> println it }
+	def logDataError = { recordNumber, className, fieldName, rejectedValue ->
+		errorMessage "${it.objectName} rejected value '${rejectedValue}' for field ${fieldName}"
+	}
 
 	def propertyInstanceMap = DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
 
@@ -48,7 +51,7 @@ class GormUtilities {
 			try {
 				def packageName = gdc.packageName
 				def className = gdc.packageName + '.' + gdc.name
-				def tableName = gdc.clazz?.XSD_TABLE_NAME
+				def tableName = gdc.clazz.XSD_TABLE_NAME
 
 				tableToClass[tableName] = className
 			} catch (MissingPropertyException ex) {}
@@ -121,7 +124,7 @@ class GormUtilities {
 						errorMessage "Unable to save record #${transactionCount}, ${className}"
 						classInstance.errors.allErrors.each{
 							if (it instanceof FieldError) {
-								errorMessage "${it.objectName} rejected value '${it.rejectedValue}' for field ${it.field}"
+								logDataError transactionCount, className, it.field, it.rejectedValue
 							} else {
 								errorMessage it.toString()
 							}
@@ -144,6 +147,7 @@ class GormUtilities {
 		}
 		return readElement
 	}
+
 
 	/** Flushes cache from GORM session.
 	 * See: 

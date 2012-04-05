@@ -61,6 +61,8 @@ Mine is pushing 300 models, so I run with:
 Revision History
 ----------------
 
+* Apr 05, 2012
+  * 0.3.1      - Added CSV output log for import validation failure errors
 * Apr 04, 2012
   * 0.3.0      - Added XML Data import support
 * Mar 29, 2012
